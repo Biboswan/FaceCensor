@@ -39,13 +39,13 @@
           accept="image/*"
           onchange="loadImage()"
         />
-        <button value="submit" onclick="onSubmit()">Submit</button>
+        <button value="submit" onclick="onSubmit()">Detect Faces</button>
       </form>
       <section class="img-section">
-        <img class="img" id="source" />
-        <div class="img">
-          <canvas id="result"> </canvas>
+        <div id="source-container">
+          <img class="img" id="source" />
         </div>
+        <canvas id="result"> </canvas>
       </section>
     </main>
     <noscript>

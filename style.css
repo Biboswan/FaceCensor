@@ -13,3 +13,12 @@
 .img {
   max-width: 400px;
 }
+
+.censor-buttton {
+  position: absolute;
+  color: transparent;
+}
+
+#source-container {
+  position: relative;
+}

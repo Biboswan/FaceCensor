@@ -26,6 +26,48 @@ loadImage = () => {
   };
 };
 
+addButtonToFaces = outputs => {
+  const source_img = document.querySelector("#source");
+
+  //Event delegating for censor face buttons
+  const source_container = document.querySelector("#source-container");
+  source_container.addEventListener("click", e => {
+    console.log(e.target.id);
+    if (e.target.tagName == "BUTTON") {
+      censorFace(i);
+    }
+  });
+
+  const sourceWidth = source_img.width;
+  const sourceHeight = source_img.height;
+  const sourceNaturalWidth = source_img.naturalWidth;
+  const sourceNaturalHeight = source_img.naturalHeight;
+
+  const displayToNaturalWidthR = sourceWidth / sourceNaturalWidth;
+  const displayToNaturalHeightR = sourceHeight / sourceNaturalHeight;
+
+  const outputLen = outputs.length;
+
+  for (let i = 0; i < outputLen; i++) {
+    const output = outputs[i];
+    const boxWidth = output.detection.box.width;
+    const boxHeight = output.detection.box.height;
+    const censorX =
+      (output.detection.box.x + boxWidth / 2) * displayToNaturalWidthR;
+    const censorY =
+      (output.detection.box.y + boxHeight) * displayToNaturalHeightR;
+
+    const btn = document.createElement("button");
+    btn.classList.add("censor-buttton");
+    btn.id = i;
+    btn.style.left = censorX + "px";
+    btn.style.top = censorY + "px";
+    btn.style.width = boxWidth * displayToNaturalWidthR + "px";
+    btn.innerText = "censor me! ";
+    document.querySelector("#source-container").append(btn);
+  }
+};
+
 // Censor the detected faces with most appropriate emoji
 onSubmit = async () => {
   const model = await stackml.faceExpression(callbackLoad);
@@ -43,6 +85,7 @@ onSubmit = async () => {
   function callbackPredict(err, results) {
     console.log(results);
 
+    addButtonToFaces(results.outputs);
     // draw output keypoints in the image
 
     const sourceWidth = source_img.width;
@@ -76,6 +119,7 @@ onSubmit = async () => {
 
     const { outputs } = results;
     const outputLen = outputs.length;
+
     let maxP;
     for (let i = 0; i < outputLen; i++) {
       const output = outputs[i];
@@ -91,9 +135,9 @@ onSubmit = async () => {
       const boxWidth = output.detection.box.width;
       const boxHeight = output.detection.box.height;
 
-      let censorX =
+      const censorX =
         (output.detection.box.x + boxWidth / 2) * displayToNaturalWidthR;
-      let censorY =
+      const censorY =
         (output.detection.box.y + boxHeight) * displayToNaturalHeightR;
 
       ctx.font = `${boxHeight * displayToNaturalHeightR}px Arial`;
