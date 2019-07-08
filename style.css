@@ -1,0 +1,15 @@
+.app-main {
+  display: flex;
+  width: 100vw;
+  flex-direction: column;
+}
+
+.img-section {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.img {
+  max-width: 400px;
+}

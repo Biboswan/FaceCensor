@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="description"
+      content="Simple GUI tool for non-AI people to use machine learning."
+    />
+    <title>StackML - Platform to use Machine Learning in the browser</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://stackml.com/library-js/stackml.min.js"></script>
+    <script
+      type="application/javascript"
+      charset="utf-8"
+      src="./index.js"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1>
+          <a href="/"><span>StackML</span></a>
+        </h1>
+      </nav>
+    </header>
+    <main class="app-main">
+      <form onsubmit="event.preventDefault()">
+        <input
+          id="image-input"
+          type="file"
+          accept="image/*"
+          onchange="loadImage()"
+        />
+        <button value="submit" onclick="onSubmit()">Submit</button>
+      </form>
+      <section class="img-section">
+        <img class="img" id="source" />
+        <div class="img">
+          <canvas id="result"> </canvas>
+        </div>
+      </section>
+    </main>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+  </body>
+</html>
