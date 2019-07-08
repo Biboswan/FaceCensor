@@ -8,6 +8,7 @@ const express = {
   disgusted: "😫",
   surprised: "😲"
 };
+const noOfExpress = Object.keys(express).length;
 
 const init = async () => {
   await stackml.init({
@@ -15,30 +16,25 @@ const init = async () => {
   });
 };
 
+let outputs, displayToNaturalWidthR, displayToNaturalHeightR, ctx;
+
 // Load image chosen in the web page
 loadImage = () => {
   const input = document.querySelector("#image-input");
   const fReader = new FileReader();
   fReader.readAsDataURL(input.files[0]);
   fReader.onloadend = event => {
-    // Cleaning existing censor buttons
-    document.querySelectorAll(".censor-buttton").forEach(el => el.remove());
-
-    const source_img = document.querySelector("#source");
-    source_img.src = event.target.result;
+    document.querySelector("#detect-faces-btn").disabled = false;
+    // Cleaning existing face censor buttons
+    document.querySelectorAll(".censor-btn").forEach(el => el.remove());
+    document.querySelector("#source").src = event.target.result;
+    document
+      .querySelector("#source-container")
+      .removeEventListener("click", handleSourceContainerClick);
   };
 };
 
 addButtonToFaces = outputs => {
-  const source_img = document.querySelector("#source");
-  const sourceWidth = source_img.width;
-  const sourceHeight = source_img.height;
-  const sourceNaturalWidth = source_img.naturalWidth;
-  const sourceNaturalHeight = source_img.naturalHeight;
-
-  const displayToNaturalWidthR = sourceWidth / sourceNaturalWidth;
-  const displayToNaturalHeightR = sourceHeight / sourceNaturalHeight;
-
   const outputLen = outputs.length;
 
   for (let i = 0; i < outputLen; i++) {
@@ -48,28 +44,31 @@ addButtonToFaces = outputs => {
     const censorX =
       (output.detection.box.x + boxWidth / 2) * displayToNaturalWidthR;
     const censorY =
-      (output.detection.box.y + boxHeight) * displayToNaturalHeightR;
+      (output.detection.box.y + boxHeight / 2) * displayToNaturalHeightR;
 
     const btn = document.createElement("button");
-    btn.classList.add("censor-buttton");
+    btn.classList.add("censor-btn");
     btn.id = i;
     btn.style.left = censorX + "px";
     btn.style.top = censorY + "px";
     btn.style.width = boxWidth * displayToNaturalWidthR + "px";
-    btn.innerHTML = "censor me! ";
+    btn.innerHTML = "censor";
     document.querySelector("#source-container").append(btn);
   }
 };
 
 // Censor the detected faces with most appropriate emoji
 onSubmit = async () => {
+  const censorAllBtn = document.querySelector("#censor-all-btn");
+  censorAllBtn.disabled = true;
   const model = await stackml.faceExpression(callbackLoad);
+
   function callbackLoad() {
     console.log("callback after face landmark detection model is loaded!");
   }
 
-  // make prediction with the image
   const source_img = document.querySelector("#source");
+  // make prediction with the image
   model.detect(source_img, callbackPredict);
 
   // callback after prediction
@@ -78,31 +77,18 @@ onSubmit = async () => {
 callbackPredict = (err, results) => {
   const source_img = document.querySelector("#source");
   const res_img = document.querySelector("#result");
-  const censorAllBtn = document.querySelector("#censor-all-btn");
-  censorAllBtn.disabled = true;
 
   console.log(results);
 
   //Event delegating for censor face buttons
   const source_container = document.querySelector("#source-container");
-  source_container.addEventListener("click", e => {
-    console.log(e.target.id);
-    if (e.target.tagName == "BUTTON") {
-      censorFace(e.target.id);
-    }
-  });
+  source_container.addEventListener("click", handleSourceContainerClick);
 
-  const { outputs } = results;
-  const outputLen = outputs.length;
+  const censorAllBtn = document.querySelector("#censor-all-btn");
+  outputs = results.outputs;
 
   censorAllBtn.disabled = false;
-  censorAllBtn.addEventListener("click", () => {
-    for (let i = 0; i < outputLen; i++) {
-      censorFace(i);
-    }
-  });
-
-  addButtonToFaces(results.outputs);
+  censorAllBtn.addEventListener("click", handleCensorAllBtnClick);
 
   // draw output keypoints in the image
 
@@ -117,10 +103,12 @@ callbackPredict = (err, results) => {
   const sourceNaturalWidth = source_img.naturalWidth;
   const sourceNaturalHeight = source_img.naturalHeight;
 
-  const displayToNaturalWidthR = sourceWidth / sourceNaturalWidth;
-  const displayToNaturalHeightR = sourceHeight / sourceNaturalHeight;
+  displayToNaturalWidthR = sourceWidth / sourceNaturalWidth;
+  displayToNaturalHeightR = sourceHeight / sourceNaturalHeight;
 
-  const ctx = res_img.getContext("2d");
+  addButtonToFaces(outputs);
+
+  ctx = res_img.getContext("2d");
 
   ctx.drawImage(
     source_img,
@@ -134,29 +122,45 @@ callbackPredict = (err, results) => {
     sourceHeight
   );
   ctx.textAlign = "center";
+};
 
-  const censorFace = i => {
-    const output = outputs[i];
-    let maxP = 0;
-    //Find most suitable expression i.e having highest probability
-    for (let j = 0; j < 7; j++) {
-      if (maxP < output.expressions[j].probability) {
-        emoji = output.expressions[j].expression;
-        maxP = output.expressions[j].probability;
-      }
+handleSourceContainerClick = e => {
+  console.log(e.target.id);
+  if (e.target.tagName == "BUTTON") {
+    censorFace(e.target.id);
+  }
+};
+
+handleCensorAllBtnClick = () => {
+  const outputLen = outputs.length;
+  for (let i = 0; i < outputLen; i++) {
+    censorFace(i);
+  }
+};
+
+censorFace = i => {
+  const output = outputs[i];
+
+  let maxP = 0,
+    emoji;
+  //Find most suitable expression i.e having highest probability
+  for (let j = 0; j < noOfExpress; j++) {
+    if (maxP < output.expressions[j].probability) {
+      emoji = output.expressions[j].expression;
+      maxP = output.expressions[j].probability;
     }
+  }
 
-    const boxWidth = output.detection.box.width;
-    const boxHeight = output.detection.box.height;
+  const boxWidth = output.detection.box.width;
+  const boxHeight = output.detection.box.height;
 
-    const censorX =
-      (output.detection.box.x + boxWidth / 2) * displayToNaturalWidthR;
-    const censorY =
-      (output.detection.box.y + boxHeight) * displayToNaturalHeightR;
+  const censorX =
+    (output.detection.box.x + boxWidth / 2) * displayToNaturalWidthR;
+  const censorY =
+    (output.detection.box.y + boxHeight) * displayToNaturalHeightR;
 
-    ctx.font = `${boxHeight * displayToNaturalHeightR}px Arial`;
-    ctx.fillText(express[emoji], censorX, censorY);
-  };
+  ctx.font = `${boxHeight * displayToNaturalHeightR}px Arial`;
+  ctx.fillText(express[emoji], censorX, censorY);
 };
 
 init();

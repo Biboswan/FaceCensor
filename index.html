@@ -13,7 +13,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
     />
     <link rel="stylesheet" href="./style.css" />
     <script src="https://stackml.com/library-js/stackml.min.js"></script>
@@ -39,9 +39,11 @@
           accept="image/*"
           onchange="loadImage()"
         />
-        <button value="submit" onclick="onSubmit()">Detect Faces</button>
+        <button disabled id="detect-faces-btn" class="btn" onclick="onSubmit()">
+          Detect Faces
+        </button>
       </form>
-      <button disabled id="censor-all-btn">Censor All</button>
+      <button disabled class="btn" id="censor-all-btn">Censor All</button>
       <section class="img-section">
         <div id="source-container">
           <img class="img" id="source" />
