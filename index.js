@@ -24,13 +24,13 @@ loadImage = () => {
   const fReader = new FileReader();
   fReader.readAsDataURL(input.files[0]);
   fReader.onloadend = event => {
-    document.querySelector("#detect-faces-btn").disabled = false;
     // Cleaning existing face censor buttons
     document.querySelectorAll(".censor-btn").forEach(el => el.remove());
     document.querySelector("#source").src = event.target.result;
     document
       .querySelector("#source-container")
       .removeEventListener("click", handleSourceContainerClick);
+    document.querySelector("#detect-faces-btn").disabled = false;
   };
 };
 
@@ -52,7 +52,8 @@ addButtonToFaces = outputs => {
     btn.style.left = censorX + "px";
     btn.style.top = censorY + "px";
     btn.style.width = boxWidth * displayToNaturalWidthR + "px";
-    btn.innerHTML = "censor";
+    btn.innerHTML = "👆";
+    btn.style["font-size"] = boxHeight * displayToNaturalHeightR + "px";
     document.querySelector("#source-container").append(btn);
   }
 };

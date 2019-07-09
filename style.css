@@ -1,35 +1,59 @@
+body,
+a,
+button {
+  color: #192319;
+}
+
+form {
+  margin-top: 5px;
+}
+
 .app-main {
   display: flex;
   width: 100vw;
   flex-direction: column;
 }
 
+header {
+  background-color: #ff5722;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .btn {
   min-width: 50px;
-  min-height: 50px;
+  height: 50px;
   width: 10vw;
   padding: 0;
+  background-color: aliceblue;
   text-align: center;
 }
 
 .img-section {
   display: flex;
-  justify-content: center;
-  flex-wrap: nowrap;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  width: 100vw;
 }
 
 .img {
-  max-width: 400px;
+  max-width: 100vw;
 }
 
 .censor-btn {
   position: absolute;
-  text-align: left;
+  text-align: center;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
 }
 
 #censor-all-btn {
+  background-color: skyblue;
   margin-top: 15px;
-  background-color: yellow;
 }
 
 #source-container {
